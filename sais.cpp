@@ -77,13 +77,13 @@ void induced_sort(int *SA, int *S, int *B, int *B_start, int n, int *LMS, int n_
 	}
 }
 
-void normalize_string(char *str, int *S, int n) {
-	int min = str[0];
+void normalize_string(int *S, int n) {
+	int min = S[0];
 	for(int i = 1; i < n; ++i) {
-		if(str[i] < min) min = str[i];
+		if(S[i] < min) min = S[i];
 	}
 	for(int i = 0; i < n; ++i) {
-		S[i] = str[i] - min + 1;
+		S[i] = S[i] - min + 1;
 	}
 }
 
@@ -106,10 +106,11 @@ bool compare_LMS(int *S, bool *sign_type, int n, int n1, int n2) {
 	return true;
 }
 
-void name_substrings(int *SA1, int *SA, int *S, int *LMS, int n, int n_LMS, bool *sign_type) {
+void name_substrings(int *SA1, int *SA, int *S, int *LMS, int n, int n_LMS, bool *sign_type, bool *unique) {
 	int name = 0;
 	int *named = (int*) malloc(n * sizeof(int));
 	int last = -1;
+	*unique = true;
 	for(int i = 0; i < n; ++i) {
 		if(!is_LMS(sign_type, SA[i])) continue;
 		if(i == 0) {
@@ -117,7 +118,11 @@ void name_substrings(int *SA1, int *SA, int *S, int *LMS, int n, int n_LMS, bool
 			last = SA[i];
 			continue;
 		}
-		if(!compare_LMS(S, sign_type, n, SA[i], last)) ++name;
+		if(!compare_LMS(S, sign_type, n, SA[i], last)) {
+			++name;
+		} else {
+			*unique = false;
+		}
 		named[SA[i]] = name;
 		last = SA[i];
 	}
@@ -152,36 +157,53 @@ void determine_SA(int *SA, int *S, int *SA1, int *LMS, int *B, int *B_start, boo
 	}
 }
 
-int main(void) {
-
-	char SS[10000];
-	int n;
-	scanf("%d %s", &n, SS);
-	int S[1000];
+void solve(int *S, int *SA, int n) {
 	bool s[10000];
 	int LMS[100];
 	int B[100];
 	int B_start[100];
-	int SA[100];
 	int SA1[100];
 	int n_LMS = 0;
-	normalize_string(SS, S, n);
+	bool unique;
+	normalize_string(S, n);
 	S[n++] = 0;
 	determine_sign_type(S, n, s);
 	determine_LMS(s, n, LMS, &n_LMS);
 	initialize_buckets(S, n, B, B_start);
 	induced_sort(SA, S, B, B_start, n, LMS, n_LMS, s);
-	name_substrings(SA1, SA, S, LMS, n, n_LMS, s);
+	name_substrings(SA1, SA, S, LMS, n, n_LMS, s, &unique);
+	int SA2[100];
+	if(!unique) {
+		solve(SA1, SA2, n_LMS);
+		for(int i = 1; i < n_LMS + 1; ++i) SA1[i-1] = SA2[i];
+	}
 	initialize_buckets(S, n, B, B_start);
-	
-	for(int i = 0; i < n_LMS; ++i) printf("%d ", LMS[i]);
-	printf("\n");
-
-	for(int i = 0; i < n; ++i) printf("%d ", SA[i]);
-	printf("\n");
-	for(int i = 0; i < n_LMS; ++i) printf("%d ", SA1[i]);
-	printf("\n\n");
 	determine_SA(SA, S, SA1, LMS, B, B_start, s, n, n_LMS);
-	for(int i = 0; i < n; ++i) printf("%d ", SA[i]);
+}
+
+void convert_to_int(char *SS, int *S, int n) {
+	for(int i = 0; i < n; ++i) {
+		S[i] = SS[i];
+	}
+}
+
+void print_sorted(char *S, int *SA, int n) {
+	for(int i = 0; i < n + 1; ++i) {
+		printf("%s\n", S + SA[i]);
+	}
+}
+
+int main(void) {
+
+	char SS[10000] = {1, 3, 1, 2, 0};
+	int n;
+	scanf("%d %s", &n, SS);
+	int S[10000];
+	convert_to_int(SS, S, n);
+	int SA[100];
+	solve(S, SA, n);
+	
+	for(int i = 1; i < n + 1; ++i) printf("%d ", SA[i]);
+	print_sorted(SS, SA, n);
 	return 0;
 }
