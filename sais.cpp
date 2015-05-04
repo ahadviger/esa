@@ -238,7 +238,6 @@ void determine_SA_LCP(int *SA, int *LCP, int *S, int *SA1, int *LMS, int *B, int
 }
 
 void solve(int *S, int *SA, int n) {
-	printf("ulaz u solve\n");
 	bool s[10000];
 	int LMS[100];
 	int B[100];
@@ -250,9 +249,6 @@ void solve(int *S, int *SA, int n) {
 	S[n++] = 0;
 	determine_sign_type(S, n, s);
 	determine_LMS(s, n, LMS, &n_LMS);
-	
-	for(int i = 0; i < n_LMS; ++i) printf("%d ", LMS[i]);
-	printf("\n");
 	initialize_buckets(S, n, B, B_start);
 	induced_sort(SA, S, B, B_start, n, LMS, n_LMS, s);
 	name_substrings(SA1, SA, S, LMS, n, n_LMS, s, &unique);
@@ -271,8 +267,31 @@ void convert_to_int(char *SS, int *S, int n) {
 	}
 }
 
+void determine_ISA(int *ISA, int *SA, int n) {
+	for(int i = 0; i < n; ++i) {
+		ISA[SA[i]] = i;
+	}
+}
+
+void determine_LCP(int *LCP, int *S, int *SA, int *ISA, int n) {
+	if(ISA == NULL) {
+		determine_ISA(ISA, SA, n);
+	}
+	
+	int l = 0;
+	for(int i = 0; i < n; ++i) {
+		int k = ISA[i];
+		int j = SA[k-1];
+		while(i + l < n && j + l < n && S[i+l] == S[j+l]) {
+			++l;
+		}
+		LCP[k] = l;
+		if(l > 0) --l;
+	}
+}
+
 void print_sorted(char *S, int *SA, int n) {
-	for(int i = 0; i < n + 1; ++i) {
+	for(int i = 1; i < n + 1; ++i) {
 		printf("%s\n", S + SA[i]);
 	}
 }
@@ -285,9 +304,16 @@ int main(void) {
 	int S[10000];
 	convert_to_int(SS, S, n);
 	int SA[100];
+	int ISA[100];
+	int LCP[100];
 	solve(S, SA, n);
-	
+	determine_ISA(ISA, SA, n + 1);
+	determine_LCP(LCP, S, SA, ISA, n + 1);
 	for(int i = 0; i < n + 1; ++i) printf("%d ", SA[i]);
+	printf("\n");
+	for(int i = 0; i < n + 1; ++i) printf("%d ", ISA[i]);
+	printf("\n");
+	for(int i = 0; i < n + 1; ++i) printf("%d ", LCP[i]);
 	printf("\n");
 	print_sorted(SS, SA, n);
 
