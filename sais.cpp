@@ -131,6 +131,14 @@ void name_substrings(int *SA1, int *SA, int *S, int *LMS, int n, int n_LMS, bool
 	}
 }
 
+bool same_buckets(int a, int b, int *B, int n) {
+	int r = max(CHAR_NUMBER, n);
+	for(int i = 0; i < r; ++i) {
+		if(a < B[i] && b >= B[i] || b < B[i] && a >= B[i]) return false;
+	}
+	return true;
+}
+
 void determine_SA(int *SA, int *S, int *SA1, int *LMS, int *B, int *B_start, bool *sign_type, int n, int n_LMS) {
 	int B_end[100];
 	for(int i = 0; i < n; ++i) {
@@ -157,7 +165,80 @@ void determine_SA(int *SA, int *S, int *SA1, int *LMS, int *B, int *B_start, boo
 	}
 }
 
+void determine_SA_LCP(int *SA, int *LCP, int *S, int *SA1, int *LMS, int *B, int *B_start, bool *sign_type, int n, int n_LMS) {
+	int B_end[100];
+	int SA_i[100];
+	int B_init[100];
+	for(int i = 0; i < n; ++i) {
+		SA[i] = -1;
+		B_end[i] = B[i];
+		SA_i[i] = -1;
+		B_init[i] = B_start[i];
+	}
+
+	for(int i = n_LMS - 1; i >= 0; --i) {
+		SA[B[S[LMS[SA1[i]]]]--] = LMS[SA1[i]];
+	//	LCP[B[S[LMS[SA1[i]]]] + 1] = LCP_LMS[SA1[i]];
+		LCP[B[S[LMS[SA1[i]]]] + 1] = 0;
+	}
+		
+	for(int i = 0; i < n; ++i) {
+		if(SA[i] <= 0) continue;
+		if(!sign_type[SA[i] - 1]) {
+			SA[B_start[S[SA[i] - 1]]] = SA[i] - 1;
+			if(SA_i[S[SA[i] - 1]] == -1) {
+				LCP[B_start[S[SA[i] - 1]]] = 0;
+			} else {
+				int ii = SA_i[S[SA[i] - 1]];
+				if(same_buckets(i, ii, B_init, n)) {
+					int min = LCP[ii + 1];
+					for(int j = ii + 1; j <= i; ++j) {
+						if(LCP[j] < min) min = LCP[j];
+					}
+					printf("%d\n", min);
+					LCP[B_start[S[SA[i] - 1]]] = min + 1;
+				} else {
+					printf("bok");
+					LCP[B_start[S[SA[i] - 1]]] = 1;
+				}
+			}
+			SA_i[S[SA[i] - 1]] = i;
+			B_start[S[SA[i] - 1]]++;
+		}
+	}
+	
+	for(int i = 0; i < n; ++i) {
+		SA_i[i] = -1;
+	}
+
+	for(int i = n - 1; i >= 0; --i) {
+		if(SA[i] <= 0) continue;
+		if(sign_type[SA[i] - 1]) {
+			SA[B_end[S[SA[i] - 1]]] = SA[i] - 1;
+			if(SA_i[S[SA[i] - 1]] == -1) {
+				LCP[B_end[S[SA[i] - 1]]] = 0;
+			} else {
+				int ii = SA_i[S[SA[i] - 1]];
+				if(same_buckets(i, ii, B_init, n)) {
+					int min = LCP[i + 1];
+					for(int j = i + 1; j <= ii; ++j) {
+						if(LCP[j] < min) min = LCP[j];
+					}
+					printf("%d\n", min);
+					LCP[B_end[S[SA[i] - 1]]] = min + 1;
+				} else {
+				printf("bok");
+					LCP[B_end[S[SA[i] - 1]]] = 1;
+				}
+			}
+			SA_i[S[SA[i] - 1]] = i;
+			B_end[S[SA[i] - 1]]--;
+		}
+	}
+}
+
 void solve(int *S, int *SA, int n) {
+	printf("ulaz u solve\n");
 	bool s[10000];
 	int LMS[100];
 	int B[100];
@@ -169,6 +250,9 @@ void solve(int *S, int *SA, int n) {
 	S[n++] = 0;
 	determine_sign_type(S, n, s);
 	determine_LMS(s, n, LMS, &n_LMS);
+	
+	for(int i = 0; i < n_LMS; ++i) printf("%d ", LMS[i]);
+	printf("\n");
 	initialize_buckets(S, n, B, B_start);
 	induced_sort(SA, S, B, B_start, n, LMS, n_LMS, s);
 	name_substrings(SA1, SA, S, LMS, n, n_LMS, s, &unique);
@@ -203,7 +287,9 @@ int main(void) {
 	int SA[100];
 	solve(S, SA, n);
 	
-	for(int i = 1; i < n + 1; ++i) printf("%d ", SA[i]);
+	for(int i = 0; i < n + 1; ++i) printf("%d ", SA[i]);
+	printf("\n");
 	print_sorted(SS, SA, n);
+
 	return 0;
 }
