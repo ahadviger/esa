@@ -290,6 +290,24 @@ void determine_LCP(int *LCP, int *S, int *SA, int *ISA, int n) {
 	}
 }
 
+int search(char *S, char *pattern, int *SA, int n) {
+	int m = strlen(pattern);
+	int l = 0, r = n - 1;
+	while (l <= r) {
+		int mid = l + (r - l)/2;
+		int res = strncmp(pattern, S + SA[mid], m);
+        if (res == 0) {
+			return SA[mid];
+		}
+		if (res < 0) {
+			r = mid - 1;
+		} else {
+			l = mid + 1;
+		}
+	}
+	return -1;
+}
+
 void print_sorted(char *S, int *SA, int n) {
 	for(int i = 1; i < n + 1; ++i) {
 		printf("%s\n", S + SA[i]);
@@ -299,8 +317,11 @@ void print_sorted(char *S, int *SA, int n) {
 int main(void) {
 
 	char SS[10000] = {1, 3, 1, 2, 0};
+	char p[1000];
 	int n;
-	scanf("%d %s", &n, SS);
+	scanf("%s", SS);
+	n = strlen(SS);
+	scanf("%s", p);
 	int S[10000];
 	convert_to_int(SS, S, n);
 	int SA[100];
@@ -316,6 +337,8 @@ int main(void) {
 	for(int i = 0; i < n + 1; ++i) printf("%d ", LCP[i]);
 	printf("\n");
 	print_sorted(SS, SA, n);
+	
+	printf("%d\n", search(SS, p, SA + 1, n));
 
 	return 0;
 }
