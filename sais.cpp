@@ -2,14 +2,11 @@
 #include <cstring>
 #include <algorithm>
 #include <stack>
-
-using namespace std;
-
+#include <vector>
+#include "lcpinterval.hpp"
+#include "childtable.hpp"
 #define CHAR_NUMBER 100
 
-typedef struct {
-	int up, down, nextlindex;
-} Child_Table;
 
 void determine_char_type(int *S, int n, bool *char_type) {
 	// 0 = L-type, 1 = S-type
@@ -41,7 +38,7 @@ bool is_LMS(bool *char_type, int i) {
 }
 
 void initialize_buckets(int *S, int n, int *B, int *B_start) {
-	int r = max(CHAR_NUMBER, n);
+	int r = std::max(CHAR_NUMBER, n);
 	for(int i = 0; i < r; ++i) {
 		B[i] = 0;
 	}
@@ -61,7 +58,7 @@ void induced_sort(int *SA, int *S, int *B, int *B_start, int n, int *LMS, int n_
 	for(int i = 0; i < n; ++i) {
 		SA[i] = -1;
 	}
-	int r = max(CHAR_NUMBER, n);
+	int r = std::max(CHAR_NUMBER, n);
 	for(int i = 0; i < r; ++i) {
 		B_end[i] = B[i];
 	}
@@ -145,20 +142,12 @@ void name_substrings(int *S1, int *SA, int *S, int *LMS, int n, int n_LMS, bool 
 	free(named);
 }
 
-bool same_buckets(int a, int b, int *B, int n) {
-	int r = max(CHAR_NUMBER, n);
-	for(int i = 0; i < r; ++i) {
-		if(a < B[i] && b >= B[i] || b < B[i] && a >= B[i]) return false;
-	}
-	return true;
-}
-
-void determine_SA(char *SS, int *SA, int *S, int *SA1, int *LMS, int *B, int *B_start, bool *char_type, int n, int n_LMS) {
+void determine_SA(int *SA, int *S, int *SA1, int *LMS, int *B, int *B_start, bool *char_type, int n, int n_LMS) {
 	int B_end[100];
 	for(int i = 0; i < n; ++i) {
 		SA[i] = -1;
 	}
-	int r = max(CHAR_NUMBER, n);
+	int r = std::max(CHAR_NUMBER, n);
 	for(int i = 0; i < r; ++i) {
 		B_end[i] = B[i];
 	}
@@ -182,82 +171,13 @@ void determine_SA(char *SS, int *SA, int *S, int *SA1, int *LMS, int *B, int *B_
 	}
 }
 
-// ovo ne radi
-void determine_SA_LCP(int *SA, int *LCP, int *S, int *SA1, int *LMS, int *B, int *B_start, bool *char_type, int n, int n_LMS) {
-	int B_end[100];
-	int SA_i[100];
-	int B_init[100];
-	for(int i = 0; i < n; ++i) {
-		SA[i] = -1;
-		B_end[i] = B[i];
-		SA_i[i] = -1;
-		B_init[i] = B_start[i];
-	}
-
-	for(int i = n_LMS - 1; i >= 0; --i) {
-		SA[B[S[LMS[SA1[i]]]]--] = LMS[SA1[i]];
-	//	LCP[B[S[LMS[SA1[i]]]] + 1] = LCP_LMS[SA1[i]];
-		LCP[B[S[LMS[SA1[i]]]] + 1] = 0;
-	}
-		
-	for(int i = 0; i < n; ++i) {
-		if(SA[i] <= 0) continue;
-		if(!char_type[SA[i] - 1]) {
-			SA[B_start[S[SA[i] - 1]]] = SA[i] - 1;
-			if(SA_i[S[SA[i] - 1]] == -1) {
-				LCP[B_start[S[SA[i] - 1]]] = 0;
-			} else {
-				int ii = SA_i[S[SA[i] - 1]];
-				if(same_buckets(i, ii, B_init, n)) {
-					int min = LCP[ii + 1];
-					for(int j = ii + 1; j <= i; ++j) {
-						if(LCP[j] < min) min = LCP[j];
-					}
-					LCP[B_start[S[SA[i] - 1]]] = min + 1;
-				} else {
-					LCP[B_start[S[SA[i] - 1]]] = 1;
-				}
-			}
-			SA_i[S[SA[i] - 1]] = i;
-			B_start[S[SA[i] - 1]]++;
-		}
-	}
-	
-	for(int i = 0; i < n; ++i) {
-		SA_i[i] = -1;
-	}
-
-	for(int i = n - 1; i >= 0; --i) {
-		if(SA[i] <= 0) continue;
-		if(char_type[SA[i] - 1]) {
-			SA[B_end[S[SA[i] - 1]]] = SA[i] - 1;
-			if(SA_i[S[SA[i] - 1]] == -1) {
-				LCP[B_end[S[SA[i] - 1]]] = 0;
-			} else {
-				int ii = SA_i[S[SA[i] - 1]];
-				if(same_buckets(i, ii, B_init, n)) {
-					int min = LCP[i + 1];
-					for(int j = i + 1; j <= ii; ++j) {
-						if(LCP[j] < min) min = LCP[j];
-					}
-					LCP[B_end[S[SA[i] - 1]]] = min + 1;
-				} else {
-					LCP[B_end[S[SA[i] - 1]]] = 1;
-				}
-			}
-			SA_i[S[SA[i] - 1]] = i;
-			B_end[S[SA[i] - 1]]--;
-		}
-	}
-}
-
 void print_sorted(char *S, int *SA, int n) {
 	for(int i = 1; i < n + 1; ++i) {
 		 printf("%s\n", S + SA[i]);
 	}
 }
 
-void solve(char *SS, int *S, int *SA, int n) {
+void solve(int *S, int *SA, int n) {
 	// printf("ulaz u solve\n");
 	bool s[10000];
 	int LMS[100];
@@ -277,7 +197,7 @@ void solve(char *SS, int *S, int *SA, int n) {
 	name_substrings(S1, SA, S, LMS, n, n_LMS, s, &unique);
 	
 	if(!unique) {
-		solve(SS, S1, SA1, n_LMS);
+		solve(S1, SA1, n_LMS);
 		for(int i = 1; i < n_LMS + 1; ++i) {
 			SA1[i-1] = SA1[i];
 		}
@@ -287,7 +207,7 @@ void solve(char *SS, int *S, int *SA, int n) {
 		}
 	}
 	initialize_buckets(S, n, B, B_start);
-	determine_SA(SS, SA, S, SA1, LMS, B, B_start, s, n, n_LMS);
+	determine_SA(SA, S, SA1, LMS, B, B_start, s, n, n_LMS);
 }
 
 void convert_to_int(char *SS, int *S, int n) {
@@ -319,21 +239,21 @@ void determine_LCP(int *LCP, int *S, int *SA, int *ISA, int n) {
 	}
 }
 
-void construct_child_table(Child_Table *CT, int *LCP, int n) {
+void construct_child_table(ChildTable* childtab, int *LCP, int n) {
 	int last_index = -1;
-	stack<int> stack;
+	std::stack<int> stack;
 	stack.push(0);
 	for(int i = 1; i < n; ++i) {
 		while(LCP[i] < LCP[stack.top()]) {
 			last_index = stack.top();
 			stack.pop();
 			if(LCP[i] <= LCP[stack.top()] && LCP[stack.top()] != LCP[last_index]) {
-				CT[stack.top()].down = last_index;
+				childtab[stack.top()].down = last_index;
 			}
 		}
 		if(LCP[i] >= LCP[stack.top()]) {
 			if(last_index != -1) {
-				CT[i].up = last_index;
+				childtab[i].up = last_index;
 				last_index = -1;
 			}
 			stack.push(i);
@@ -350,10 +270,71 @@ void construct_child_table(Child_Table *CT, int *LCP, int n) {
 		if(LCP[i] == LCP[stack.top()]) {
 			last_index = stack.top();
 			stack.pop();
-			CT[last_index].nextlindex = i;
+			childtab[last_index].nextlIndex = i;
 		}
 		stack.push(i);
 	}
+}
+
+void getChildIntervals(std::vector< std::pair<int, int> >& intervalList, ChildTable* childtab, int i, int j) {
+	intervalList.clear();
+	int i1, i2;
+	if(i < childtab[j+1].up && j >= childtab[j+1].up) {
+		i1 = childtab[j+1].up;
+	} else {
+		i1 = childtab[i].down;
+	}
+	intervalList.push_back(std::make_pair(i, i1 - 1));
+	while(childtab[i1].nextlIndex != -1) {
+		i2 = childtab[i1].nextlIndex;
+		intervalList.push_back(std::make_pair(i1, i2 - 1));
+		i1 = i2;
+	}
+	intervalList.push_back(std::make_pair(i1, j));
+}
+
+int getlcp(ChildTable *childtab, int *lcptab, int i, int j) {
+	if(i < childtab[j+1].up && j >= childtab[j+1].up) {
+		return lcptab[childtab[j+1].up];
+	} else {
+		return lcptab[childtab[i].down];
+	}
+}
+
+LcpInterval* getInterval(int i, int j, char a, int *SA, ChildTable *childtab, int *lcptab, char *S, int N) {
+	int n = 0, m = 0, lcp = 0;
+	if(i < 0 || i >= j) return NULL;
+	if(i == 0 && j == N) {
+		n = 0;
+		while(childtab[n].nextlIndex != 0) {
+			m = childtab[n].nextlIndex;
+			if(S[SA[n]] == a) {
+				return new LcpInterval(getlcp(childtab, lcptab, n, m - 1), n, m - 1);
+			}
+			n = m;
+		}
+	} else {
+		lcp = getlcp(childtab, lcptab, i, j);
+		if(childtab[j+1].up <= j) {
+			n = childtab[j+1].up;
+		} else {
+			n = childtab[i].down;
+		}
+		if(S[SA[i] + lcp] == a) {
+			return new LcpInterval(getlcp(childtab, lcptab, i, n - 1), i, n - 1);
+		}
+		while(childtab[n].nextlIndex != 0) {
+			m = childtab[n].nextlIndex;
+			if(S[SA[n] + lcp] == a) {
+				return new LcpInterval(getlcp(childtab, lcptab, n, m - 1), n, m - 1);
+			}
+			n = m;
+		}
+		if(S[SA[n] + lcp] == a) {
+			return new LcpInterval(getlcp(childtab, lcptab, n, j), n, j);
+		}
+	}
+	return NULL;
 }
 
 int search(char *S, char *pattern, int *SA, int n) {
@@ -381,28 +362,30 @@ int main(void) {
 	int n;
 	scanf("%s", SS);
 	n = strlen(SS);
-//	scanf("%s", p);
 	int S[10000];
 	convert_to_int(SS, S, n);
 	normalize_string(S, n);
 	int SA[100];
 	int ISA[100];
 	int LCP[100];
-	solve(SS, S, SA, n);
-//	determine_ISA(ISA, SA, n + 1);
-//	determine_LCP(LCP, S, SA, ISA, n + 1);
-//	for(int i = 1; i < n + 1; ++i)  printf("%d\n", SA[i]);
-/*	// printf("\n");
-	for(int i = 0; i < n + 1; ++i)  printf("%d ", LCP[i]);
-	// printf("\n");*/
+	solve(S, SA, n);
+	determine_ISA(ISA, SA, n + 1);
+	determine_LCP(LCP, S, SA, ISA, n + 1);
+	for(int i = 1; i < n + 1; ++i)  printf("%d ", SA[i]);
+	printf("\n");
+	for(int i = 1; i < n + 1; ++i)  printf("%d ", LCP[i]);
+	printf("\n");
 	print_sorted(SS, SA, n);
-	/*
+	
 
-	Child_Table CT[100];
-	construct_child_table(CT, LCP, n + 1);
+	ChildTable childtab[100];
 	for(int i = 0; i < n; ++i) {
-		// printf("%d %d %d\n", CT[i].up, CT[i].down, CT[i].nextlindex);
-	}*/
+		childtab[i].up = childtab[i].down = childtab[i].nextlIndex = -1;
+	}
+	construct_child_table(childtab, LCP, n + 1);
+	for(int i = 0; i < n; ++i) {
+		printf("%3d %3d %3d\n", childtab[i].up, childtab[i].down, childtab[i].nextlIndex);
+	}
 	
 	return 0;
 }
