@@ -1,1 +1,1 @@
-# sa-is
+# Enhanced Suffix Array
