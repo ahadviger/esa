@@ -172,7 +172,7 @@ void determine_SA(int *SA, int *S, int *SA1, int *LMS, int *B, int *B_start, boo
 }
 
 void print_sorted(char *S, int *SA, int n) {
-	for(int i = 1; i < n + 1; ++i) {
+	for(int i = 0; i < n; ++i) {
 		 printf("%s\n", S + SA[i]);
 	}
 }
@@ -279,7 +279,7 @@ void construct_child_table(ChildTable* childtab, int *LCP, int n) {
 void getChildIntervals(std::vector< std::pair<int, int> >& intervalList, ChildTable* childtab, int i, int j) {
 	intervalList.clear();
 	int i1, i2;
-	if(i < childtab[j+1].up && j >= childtab[j+1].up) {
+	if(i < childtab[j+1].up && childtab[j+1].up <= j) {
 		i1 = childtab[j+1].up;
 	} else {
 		i1 = childtab[i].down;
@@ -337,6 +337,77 @@ LcpInterval* getInterval(int i, int j, char a, int *SA, ChildTable *childtab, in
 	return NULL;
 }
 
+void search2(char *p, int len, int *SA, ChildTable *childtab, int *lcptab, char *S, int n) {
+    int c = 0, min = 0, i = 0, j = 0, lcp = 0, m = len;
+    LcpInterval *interval = getInterval(0, n, p[c], SA, childtab, lcptab, S, n);
+    bool query_found = interval != NULL;
+	while(interval != NULL && c < m && query_found) {
+		i = interval->Lb;
+		j = interval->Rb;
+		if(i != j) {
+			lcp = interval->lcp;
+			min = std::min(lcp, m);
+			interval = min != m ? getInterval(i, j, p[min], SA, childtab, lcptab, S, n) : NULL;
+			query_found = true;
+			for(int k = c; k < min; ++k) {
+				if(S[SA[i] + k] != p[k]) {
+					query_found = false;
+					break;
+				}
+			}
+			c = min;
+		} else {
+			query_found = true;
+			for(int k = c; k < m; ++k) {
+				if(S[SA[i] + k] != p[k]) {
+					query_found = false;
+					break;
+				}
+			}
+			interval = NULL;
+		}
+	}
+	if(query_found) {
+		for(int ii = i; ii <= j; ++ii) printf("%d ", SA[ii]);
+	}
+}
+
+void search3(char *p, int len, int *SA, ChildTable *childtab, int *lcptab, char *S, int n) {
+    int c = 0, min = 0, i = 0, j = 0, lcp = 0, m = len;
+    LcpInterval *interval = getInterval(0, n, p[c], SA, childtab, lcptab, S, n);
+	i = interval->Lb;
+	j = interval->Rb;
+    bool query_found = true;
+	while(interval != NULL && c < m && query_found) {
+		if(i != j) {
+			lcp = interval->lcp;
+			min = std::min(lcp, m);
+			query_found = true;
+			for(int k = c; k < min; ++k) {
+				if(S[SA[i] + k] != p[k]) {
+					query_found = false;
+					break;
+				}
+			}
+			c = min;
+			interval = getInterval(i, j, p[c], SA, childtab, lcptab, S, n);
+			i = interval->Lb;
+			j = interval->Rb;
+		} else {
+			query_found = true;
+			for(int k = c; k < m; ++k) {
+				if(S[SA[i] + k] != p[k]) {
+					query_found = false;
+					break;
+				}
+			}
+		}
+	}
+	if(query_found) {
+		for(int ii = i; ii <= j; ++ii) printf("%d ", SA[ii]);
+	}
+}
+
 int search(char *S, char *pattern, int *SA, int n) {
 	int m = strlen(pattern);
 	int l = 0, r = n - 1;
@@ -371,21 +442,33 @@ int main(void) {
 	solve(S, SA, n);
 	determine_ISA(ISA, SA, n + 1);
 	determine_LCP(LCP, S, SA, ISA, n + 1);
-	for(int i = 1; i < n + 1; ++i)  printf("%d ", SA[i]);
+	for(int i = 1; i < n + 1; ++i) {
+		printf("%d ", SA[i]);
+		SA[i-1] = SA[i];
+	}
 	printf("\n");
-	for(int i = 1; i < n + 1; ++i)  printf("%d ", LCP[i]);
+	for(int i = 1; i < n + 1; ++i) {
+		printf("%d ", LCP[i]);
+		LCP[i-1] = LCP[i];
+	}
+	
 	printf("\n");
 	print_sorted(SS, SA, n);
 	
 
 	ChildTable childtab[100];
-	for(int i = 0; i < n; ++i) {
+	for(int i = 0; i < n + 1; ++i) {
 		childtab[i].up = childtab[i].down = childtab[i].nextlIndex = -1;
 	}
-	construct_child_table(childtab, LCP, n + 1);
-	for(int i = 0; i < n; ++i) {
+	construct_child_table(childtab, LCP, n);
+	for(int i = 0; i < n + 1; ++i) {
 		printf("%3d %3d %3d\n", childtab[i].up, childtab[i].down, childtab[i].nextlIndex);
 	}
+	
+	char PAT[100];
+	scanf("%s", PAT);
+	printf("%s\n", SS);
+	search2(PAT, strlen(PAT), SA, childtab, LCP, SS, n);
 	
 	return 0;
 }
