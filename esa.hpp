@@ -3,6 +3,70 @@
 #define CHAR_NUMBER 100
 
 class ESA {
+
+	public:
+
+		ESA(char *_str) {
+			str = _str; n = strlen(str);
+			S = (int*) malloc((n + 1) * sizeof(int));
+			for(int i = 0; i < n; ++i) {
+				S[i] = str[i];
+			}
+			SA = ISA = LCP = lcptab = NULL; childtab = NULL;
+		}
+
+		int* get_SA() {
+			if(SA == NULL) {
+				SA = (int*) malloc((n + 1) * sizeof(int));
+				int r = std::max(CHAR_NUMBER, n) + 1;
+				int *B = (int*) malloc(r * sizeof(int));
+				int *B_start = (int*) malloc(r * sizeof(int));
+				solve_SA(S, SA, n, B, B_start);
+				free(B); free(B_start);
+			}
+			++n;
+			return SA + 1;
+		}
+
+		int* get_ISA() {
+			get_SA();
+			if(ISA == NULL) {
+				ISA = (int*) malloc((n + 1) * sizeof(int));
+				determine_ISA();
+			}
+			return ISA + 1;
+		}
+
+		int* get_LCP() {
+			get_SA(); get_ISA();
+			if(LCP == NULL) {
+				LCP = (int*) malloc((n + 1) * sizeof(int));
+				determine_LCP();
+			}
+			return LCP + 1;
+		}
+		
+		ChildTable* get_child_table() {
+			get_LCP();
+			if(childtab == NULL) {
+				childtab = (ChildTable*) malloc((n + 1) * sizeof(ChildTable));
+				for(int i = 0; i < n; ++i) {
+					childtab[i].up = childtab[i].down = childtab[i].nextlIndex = -1;
+				}
+				construct_child_table();
+			}
+			return childtab;
+		}
+		
+		int search (char *pattern, int len) {}
+		
+		void print_sorted() {
+			get_SA();
+			for(int i = 1; i < n; ++i) {
+				 printf("%s\n", str + SA[i]);
+			}
+		}
+		
 	private:
 		char *str;
 		int n, *S, *SA, *lcptab;
@@ -323,68 +387,5 @@ class ESA {
 				}
 			}
 			return NULL;
-		}
-		
-	public:
-		ESA() {}
-		ESA(char *_str) {
-			str = _str; n = strlen(str);
-			S = (int*) malloc((n + 1) * sizeof(int));
-			for(int i = 0; i < n; ++i) {
-				S[i] = str[i];
-			}
-			SA = ISA = LCP = lcptab = NULL; childtab = NULL;
-		}
-
-		int* get_SA() {
-			if(SA == NULL) {
-				SA = (int*) malloc((n + 1) * sizeof(int));
-				int r = std::max(CHAR_NUMBER, n) + 1;
-				int *B = (int*) malloc(r * sizeof(int));
-				int *B_start = (int*) malloc(r * sizeof(int));
-				solve_SA(S, SA, n, B, B_start);
-				free(B); free(B_start);
-			}
-			++n;
-			return SA + 1;
-		}
-
-		int* get_ISA() {
-			get_SA();
-			if(ISA == NULL) {
-				ISA = (int*) malloc((n + 1) * sizeof(int));
-				determine_ISA();
-			}
-			return ISA + 1;
-		}
-
-		int* get_LCP() {
-			get_SA(); get_ISA();
-			if(LCP == NULL) {
-				LCP = (int*) malloc((n + 1) * sizeof(int));
-				determine_LCP();
-			}
-			return LCP + 1;
-		}
-		
-		ChildTable* get_child_table() {
-			get_LCP();
-			if(childtab == NULL) {
-				childtab = (ChildTable*) malloc((n + 1) * sizeof(ChildTable));
-				for(int i = 0; i < n; ++i) {
-					childtab[i].up = childtab[i].down = childtab[i].nextlIndex = -1;
-				}
-				construct_child_table();
-			}
-			return childtab;
-		}
-		
-		int search (char *pattern, int len) {}
-		
-		void print_sorted() {
-			get_SA();
-			for(int i = 1; i < n; ++i) {
-				 printf("%s\n", str + SA[i]);
-			}
 		}
 };
