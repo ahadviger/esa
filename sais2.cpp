@@ -502,6 +502,42 @@ void search_novi(char *p, int len, int *SA, ChildTable *childtab, int *lcptab, c
     }
 }
 
+int search_suffix_prefix(char *p, int len, int *SA, ChildTable *childtab, int *lcptab, char *S, int n) {
+    int c = 0, min = 0, i = 0, j = 0, lcp = 0, m = len;
+    LcpInterval *interval = getInterval(0, n, p[c], SA, childtab, lcptab, S, n);
+    bool query_found = interval != NULL;
+    int max = -1;
+    while (interval != NULL && c < m && query_found) {
+        i = interval->Lb;
+        j = interval->Rb;
+        if (i != j) {
+            lcp = interval->lcp;
+            min = std::min(lcp, m);
+            interval = (min != m) ? getInterval(i, j, p[min], SA, childtab, lcptab, S, n) : NULL;
+            query_found = true;
+            for (int k = c; k < min; ++k) {
+                if (S[SA[j] + k] != p[k]) {
+                    query_found = false;
+                    break;
+                }
+            }
+            if (query_found && n - SA[j] == min + 1) max = SA[j];
+            c = min;
+        } else {
+            query_found = true;
+            for (int k = c; SA[i] + k < n - 1; ++k) {
+                if (k > m || S[SA[i] + k] != p[k]) {
+                    query_found = false;
+                    break;
+                }
+            }
+            if (query_found) max = SA[i];
+            interval = NULL;
+        }
+    }
+    return max;
+}
+
 int main(void) {
 
 	char SS[10000] = {1, 3, 1, 2, 0};
@@ -545,7 +581,7 @@ int main(void) {
 	char PAT[100];
 	scanf("%s", PAT);
 	printf("%s\n", SS);
-	search_novi(PAT, strlen(PAT), SA, childtab, LCP, SS, n);
+	printf("%d\n", search_suffix_prefix(PAT, strlen(PAT), SA, childtab, LCP, SS, n));
 	
 	return 0;
 }
