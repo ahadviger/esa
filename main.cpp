@@ -3,7 +3,7 @@
 
 #include "lcpinterval.hpp"
 #include "childtable.hpp"
-#include "esa2.cpp"
+#include "esa.cpp"
 
 int main(int argc, char** argv) {
     
