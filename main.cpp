@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
         n = strlen(S);
     }
     
-    ESA2* esa = new ESA2(S, n);
+    ESA* esa = new ESA(S, n);
 
-	int m;
+    int m;
     scanf("%d", &m);
     char* P = new char[m];
     scanf("%s", P);

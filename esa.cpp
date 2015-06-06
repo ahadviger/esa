@@ -6,9 +6,9 @@
 #include "childtable.hpp"
 #define CHAR_NUMBER 100
 
-class ESA2 {
+class ESA {
  public:
-     ESA2(char* _str, int _n) {
+     ESA(char* _str, int _n) {
          n = _n;
          str = new char[n+5];
          memcpy(str, _str, n);
