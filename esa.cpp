@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <stack>
 #include <cstring>
+#include <vector>
 
 #include "lcpinterval.hpp"
 #include "childtable.hpp"
@@ -63,7 +64,7 @@ class ESA {
          return childtab;
      }
 
-     int search(char *p, int m) {
+     void search(char *p, int m, std::vector<int>& v) {
          int c = 0, min = 0, i = 0, j = 0, lcp = 0;
          LcpInterval *interval = getInterval(0, n, p[c]);
          bool query_found = interval != NULL;
@@ -97,10 +98,56 @@ class ESA {
          }
          if (c < m && interval == NULL) query_found = false;
          if (query_found) {
-             for (int k = i; k <= j; ++k) printf("%d ", SA[k]);
-             return SA[i];
+             for (int k = i; k <= j; ++k) {
+                v.push_back(SA[k]);
+             }
          }
-         return -1;
+     }
+     
+     int search_suffix_prefix(char *p, int m, std::vector<int>& v) {
+         int c = 0, min = 0, i = 0, j = 0, lcp = 0;
+         LcpInterval *interval = getInterval(0, n, p[c]);
+         bool query_found = interval != NULL;
+         int max = -1;
+         while (interval != NULL && c < m && query_found) {
+             i = interval->Lb;
+             j = interval->Rb;
+             if (i != j) {
+                 lcp = interval->lcp;
+                 min = std::min(lcp, m);
+                 interval = (min != m) ? getInterval(i, j, p[min]) : NULL;
+                 query_found = true;
+                 for (int k = c; k < min; ++k) {
+                     if (str[SA[j] + k] != p[k]) {
+                         query_found = false;
+                         break;
+                     }
+                  }
+                 if (query_found && n - SA[j] == min + 1) {
+                    v.push_back(n - 1 - SA[j]);
+                    max = SA[j];
+                 }
+                 c = min;
+             } else {
+                 query_found = true;
+                 for (int k = c; SA[i] + k < n - 1; ++k) {
+                     if (k > m || str[SA[i] + k] != p[k]) {
+                         query_found = false;
+                         break;
+                     }
+                 }
+                 if (query_found) {
+                    max = SA[i];
+                    v.push_back(n - 1 - SA[i]);
+                 }
+                 interval = NULL;
+             }
+         }
+         if (max != -1) {
+            return n - 1 - max;
+         } else {
+            return -1;
+         }
      }
 
      int search_SA(char *p, int m) {
