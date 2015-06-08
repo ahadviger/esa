@@ -1,6 +1,6 @@
 #pragma once
 
-// Klasa modelira jedan redak tablice djece,
+// Klasa modelira jedan redak tablice djece.
 class ChildTable {
  public:
      // up vrijednost tablice
