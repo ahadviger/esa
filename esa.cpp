@@ -7,8 +7,16 @@
 #include "childtable.hpp"
 #define CHAR_NUMBER 100
 
+// Klasa koja izgradjuje poboljsano sufiksno polje, odnosno: 
+// sufiksno polje, inverzno sufiksno polje, polje najduljih 
+// zajednickih prefiksa i tablicu djece.
+
 class ESA {
  public:
+     // Konstruktor. Prima znakovni niz i njegovu duljinu te za taj niz
+     // izgradjuje poboljsano sufiksno polje.
+     // Na kraj niza dodaje se znak '|' veci od svih drugih znakova
+     // abecede kako nijedan sufiks ne bi bio prefiks drugog sufiksa.
      ESA(char* _str, int _n) {
          n = _n;
          str = new char[n+5];
@@ -47,24 +55,32 @@ class ESA {
 
          delete(B); delete(B_start); delete(B_end);
      }
-
+    
+     // Vraca sufiksno polje.
      int* get_SA() {
          return SA;
      }
 
+     // Vraca inverzno sufiksno polje.
      int* get_ISA() {
          return ISA;
      }
 
+     // Vraca polje najduljih zajednickih prefiksa.
      int* get_LCP() {
          return LCP;
      }
 
+     // Vraca tablicu djece.
      ChildTable* get_child_table() {
          return childtab;
      }
 
-     void search(char *p, int m, std::vector<int>& v) {
+     // Trazi sva pojavljivanja znakovnog niza p duljine m unutar
+     // niza nad kojim je izgradjeno polje. Prima i vektor u koji
+     // se spremaju indeksi svih pojavljivanja.
+     // Vraca indeks prvog pojavljivanja unutar niza.
+     int search(char *p, int m, std::vector<int>& v) {
          int c = 0, min = 0, i = 0, j = 0, lcp = 0;
          LcpInterval *interval = getInterval(0, n, p[c]);
          bool query_found = interval != NULL;
@@ -101,10 +117,17 @@ class ESA {
              for (int k = i; k <= j; ++k) {
                 v.push_back(SA[k]);
              }
+             return SA[i];
          }
+         return -1;
      }
      
-     int search_suffix_prefix(char *p, int m, std::vector<int>& v) {
+     // Trazi sva sufiks-prefiks preklapanja, odnosno sve sufikse
+     // niza nad kojim je izgradjeno polje koji su ujedno prefiksni
+     // zadanog niza p duljine m. Prima i vektor u koji se
+     // spremaju duljine svih preklapanja.
+     // Vraca duljinu maksimalnog sufiks-prefiks preklapanja.
+     int overlap(char *p, int m, std::vector<int>& v) {
          int c = 0, min = 0, i = 0, j = 0, lcp = 0;
          LcpInterval *interval = getInterval(0, n, p[c]);
          bool query_found = interval != NULL;
@@ -150,6 +173,9 @@ class ESA {
          }
      }
 
+     // Vraca indeks prvog pojavljivanja niza p unutar
+     // niza nad kojim je izgradjeno polje, no za pretragu
+     // koristi samo sufiksno polje.
      int search_SA(char *p, int m) {
         int l = 0, r = n - 1;
         while (l <= r) {
@@ -167,9 +193,10 @@ class ESA {
         return -1;
      }
 
+     // Ispisuje sortirane sufikse.
      void print_sorted() {
          for (int i = 0; i < n; ++i) {
-             printf("%3d. %3d %s\n", i, LCP[i], str + SA[i]);
+             printf("%d. %s\n", i + 1, str + SA[i]);
          }
      }
 
@@ -179,6 +206,7 @@ class ESA {
      int *LCP, *ISA;
      ChildTable *childtab;
 
+     // Odredjuje je li pojedini znak niza L-tip ili S-tip znaka.
      void determine_char_type(int *S, int n, bool *char_type) {
          // 0 = L-type, 1 = S-type
          bool suffix_type = true;
@@ -197,17 +225,20 @@ class ESA {
          }
      }
 
+     // U niz sprema indekse svih LMS-znakova unutar niza.
      void determine_LMS(bool *char_type, int n, int *LMS, int *n_LMS) {
          for (int i = 1; i < n; ++i) {
              if (char_type[i] && !char_type[i-1]) LMS[(*n_LMS)++] = i;
          }
      }
 
+     // Provjerava je li znak na i-tom indeksu LMS-znak.
      bool is_LMS(bool *char_type, int i) {
          if (i == 0) return false;
          return (char_type[i] && !char_type[i-1]);
      }
 
+     // Postavlja pokazivace na krajeve (B) i pocetke potpolja (B_start).
      void initialize_buckets(int *S, int n, int *B, int *B_start) {
          int r = std::max(CHAR_NUMBER, n);
          for (int i = 0; i < r; ++i) {
@@ -225,6 +256,7 @@ class ESA {
          }
      }
 
+     // Inducirano sortiranje LMS-podnizove.
      void induced_sort(int *SA, int *S, int *B, int *B_start, int *B_end, int n, int *LMS, int n_LMS, bool *char_type) {
          int r = std::max(CHAR_NUMBER, n);
 
@@ -255,6 +287,7 @@ class ESA {
          }
      }
 
+     // Oduzimanje najmanje vrijednosti od svih clanova niza (najmanja postaje 1).
      void normalize_string() {
          int min = S[0];
          for (int i = 1; i < n; ++i) {
@@ -265,6 +298,7 @@ class ESA {
          }
      }
 
+     // Provjerava jesu li dva LMS-podniza jednaka.
      bool compare_LMS(int *S, bool *char_type, int n, int n1, int n2) {
          if (n1 == n - 1 || n2 == n - 1) {
              return n1 == n2;
@@ -286,6 +320,7 @@ class ESA {
          return true;
      }
 
+     // Imenovanje LMS-podnizova.
      void name_substrings(int *S1, int *SA, int *S, int *LMS, int n, int n_LMS, bool *char_type, bool *unique) {
          int name = 0;
          int* named = new int[n];
@@ -315,6 +350,7 @@ class ESA {
          delete(named);
      }
 
+     // Odredjivanje SA iz SA1.
      void determine_SA(int *SA, int *S, int *SA1, int *LMS, int *B, int *B_start, int *B_end, bool *char_type, int n, int n_LMS) {
          int r = std::max(CHAR_NUMBER, n);
 
@@ -344,6 +380,7 @@ class ESA {
          }
      }
 
+     // Odredjivanje sufiksnog polja.
      void solve_SA(int *S, int *SA, int n, int *B, int *B_start, int *B_end) {
          bool* s = new bool[n];
          int* LMS = new int[n/2+1];
@@ -359,8 +396,10 @@ class ESA {
          name_substrings(S1, SA, S, LMS, n, n_LMS, s, &unique);
 
          if (!unique) {
+             // rekurzivni poziv ako nisu sva imena jedinstvena
              solve_SA(S1, SA1, n_LMS, B, B_start, B_end);
          } else {
+             // izravno odredjivanje SA1 iz S1
              for (int i = 0; i < n_LMS; ++i) {
                  SA1[S1[i]] = i;
              }
@@ -371,12 +410,14 @@ class ESA {
          delete(s); delete(LMS); delete(S1); delete(SA1);
      }
 
+     // Odredjivanje inverznog sufiksnog polja.
      void determine_ISA() {
          for (int i = 0; i < n; ++i) {
              ISA[SA[i]] = i;
          }
      }
 
+     // Odredjivanje polja najduljih zajednickih prefiksa.
      void determine_LCP() {
          int l = 0;
          for (int i = 0; i < n; ++i) {
@@ -390,6 +431,7 @@ class ESA {
          }
      }
 
+     // Odredjivanje up, down i nextlIndex vrijednosti tablice djece.
      void construct_child_table() {
          int last_index = -1;
          std::stack<int> stack;
@@ -427,6 +469,7 @@ class ESA {
          }
      }
 
+     // Vraca LCP-vrijednost intervala [i..j].
      int getlcp(int i, int j) {
          if (i < childtab[j+1].up && j >= childtab[j+1].up) {
              return LCP[childtab[j+1].up];
@@ -435,6 +478,8 @@ class ESA {
          }
      }
 
+     // Trazi dijete LCP-intervala [i..j] ciji sufiksi imaju
+     // znak a na l-tom mjestu gdje je l LCP-vrijednost tog intervala.
      LcpInterval* getInterval(int i, int j, char a) {
          int _n = 0, m = 0, lcp = 0;
          if (i < 0 || i >= j) return NULL;

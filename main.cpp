@@ -11,6 +11,8 @@ int main(int argc, char** argv) {
     int n;
     char *S;
     
+    // ucitavanje teksta iz datoteke ili
+    // sa standardnog ulaza
     if (argc > 1) {
         FILE *f = fopen(argv[1], "r");
         fscanf(f, "%d", &n);
@@ -24,14 +26,15 @@ int main(int argc, char** argv) {
     }
     
     ESA* esa = new ESA(S, n);
-
+    
+    // ucitavanje uzorka sa standardnog ulaza
     int m;
     scanf("%d", &m);
     char* P = new char[m];
     scanf("%s", P);
     
     std::vector<int> v;
-    esa->search(P, strlen(P), v);
+    printf("First occurence of P in S: %d\n", esa->search(P, strlen(P), v));
     printf("Occurrences of P in S: ");
     for(std::vector<int> :: iterator it = v.begin(); it != v.end(); ++it) {
         printf("%d ", *it);
@@ -41,7 +44,7 @@ int main(int argc, char** argv) {
     
     std::vector<int> v2;
     printf("Longest suffix-prefix overlap: ");
-    printf("%d\n", esa->search_suffix_prefix(P, strlen(P), v2));
+    printf("%d\n", esa->overlap(P, strlen(P), v2));
     printf("Suffix-prefix overlap lengths: ");
     for(std::vector<int> :: iterator it = v2.begin(); it != v2.end(); ++it) {
         printf("%d ", *it);
