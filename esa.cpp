@@ -5,6 +5,8 @@
 
 #include "lcpinterval.hpp"
 #include "childtable.hpp"
+
+// maksimalna razlika ascii vrijednosti nekog para znakova u nizu
 #define CHAR_NUMBER 100
 
 // Klasa koja izgradjuje poboljsano sufiksno polje, odnosno: 
