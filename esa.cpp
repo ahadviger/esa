@@ -95,6 +95,8 @@ class ESA {
         }
      }
      
+     // Provjerava nalazi li se niz p unutar niza nad kojim je
+     // izgradjeno polje.
      bool contains(char *p, int m) {
         return search(p, m).first != -1;
      }
