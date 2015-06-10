@@ -2,6 +2,7 @@
 #include <stack>
 #include <cstring>
 #include <vector>
+#include <time.h>
 
 #include "lcpinterval.hpp"
 #include "childtable.hpp"
@@ -54,8 +55,6 @@ class ESA {
              childtab[i].up = childtab[i].down = childtab[i].nextlIndex = -1;
          }
          construct_child_table();
-
-         delete(B); delete(B_start); delete(B_end);
      }
     
      // Vraca sufiksno polje.
@@ -82,50 +81,26 @@ class ESA {
      // niza nad kojim je izgradjeno polje. Prima i vektor u koji
      // se spremaju indeksi svih pojavljivanja.
      // Vraca indeks prvog pojavljivanja unutar niza.
-     int search(char *p, int m, std::vector<int>& v) {
-         int c = 0, min = 0, i = 0, j = 0, lcp = 0;
-         LcpInterval *interval = getInterval(0, n, p[c]);
-         bool query_found = interval != NULL;
-
-         while (interval != NULL && c < m && query_found) {
-             i = interval->Lb;
-             j = interval->Rb;
-             if (i != j) {
-                 lcp = interval->lcp;
-                 min = std::min(lcp, m);
-                 interval = (min != m) ? getInterval(i, j, p[min]) : NULL;
-                 query_found = true;
-                 for (int k = c; k < min; ++k) {
-                     if (str[SA[i] + k] != p[k]) {
-                         query_found = false;
-                         break;
-                     }
-                 }
-                 c = min;
-             } else {
-                 query_found = true;
-                 for (int k = c; k < m; ++k) {
-                     if (str[SA[i] + k] != p[k]) {
-                         query_found = false;
-                         break;
-                     }
-                 }
-                 c = m;
-                 interval = NULL;
-             }
-         }
-         if (c < m && interval == NULL) query_found = false;
-         if (query_found) {
-             for (int k = i; k <= j; ++k) {
+     int all_occurences(char *p, int m, std::vector<int>& v) {
+        std::pair<int, int> ret = search(p, m);
+        if(ret.first != -1) {
+            int i = ret.first;
+            int j = ret.second;
+            for(int k = i; k <= j; ++k) {
                 v.push_back(SA[k]);
-             }
-             return SA[i];
-         }
-         return -1;
+            }
+            return SA[i];
+        } else {
+            return -1;
+        }
+     }
+     
+     bool contains(char *p, int m) {
+        return search(p, m).first != -1;
      }
      
      // Trazi sva sufiks-prefiks preklapanja, odnosno sve sufikse
-     // niza nad kojim je izgradjeno polje koji su ujedno prefiksni
+     // niza nad kojim je izgradjeno polje koji su ujedno prefiksi
      // zadanog niza p duljine m. Prima i vektor u koji se
      // spremaju duljine svih preklapanja.
      // Vraca duljinu maksimalnog sufiks-prefiks preklapanja.
@@ -143,11 +118,11 @@ class ESA {
                  interval = (min != m) ? getInterval(i, j, p[min]) : NULL;
                  query_found = true;
                  for (int k = c; k < min; ++k) {
-                     if (str[SA[j] + k] != p[k]) {
+                     if (str[SA[i] + k] != p[k]) {
                          query_found = false;
                          break;
                      }
-                  }
+                 }
                  if (query_found && n - SA[j] == min + 1) {
                     v.push_back(n - 1 - SA[j]);
                     max = SA[j];
@@ -174,6 +149,33 @@ class ESA {
             return -1;
          }
      }
+     
+     // Trazi sva prefiks-sufiks preklapanja, odnosno sve prefikse
+     // niza nad kojim je izgradjeno polje koji su ujedno sufiksi
+     // zadanog niza p duljine m. Prima i vektor u koji se
+     // spremaju duljine svih preklapanja.
+     // Vraca duljinu maksimalnog prefiks-sufiks preklapanja.
+     int overlap_reverse(char *p, int m, std::vector<int>& v) {
+        ESA* esa = new ESA(p, m);
+        return esa->overlap(str, n - 1, v); 
+     }
+     
+     // Trazi sva prefiks-sufiks preklapanja, odnosno sve prefikse/sufikse
+     // niza nad kojim je izgradjeno polje koji su ujedno sufiksi/prefiksi
+     // zadanog niza p duljine m. Prima i 2 vektora u koji se
+     // spremaju duljine svih preklapanja (u prvi pref-suf, a u drugi suf-pref).
+     // Vraca duljinu maksimalnog suf-pref/pref-suf preklapanja.
+     int all_overlaps(char *p, int m, std::vector<int>& v1, std::vector<int>& v2) {
+        ESA* esa = new ESA(p, m);
+        clock_t start = clock();
+        int o1 = overlap(p, m, v1);
+        int o2 = esa->overlap(str, n - 1, v2);
+        printf("Vrijeme: %lf\n", (double)(clock() - start) / CLOCKS_PER_SEC);
+        if (o1 > o2) {
+            return o1;
+        }
+        return o2;
+     }
 
      // Vraca indeks prvog pojavljivanja niza p unutar
      // niza nad kojim je izgradjeno polje, no za pretragu
@@ -198,7 +200,7 @@ class ESA {
      // Ispisuje sortirane sufikse.
      void print_sorted() {
          for (int i = 0; i < n; ++i) {
-             printf("%d. %s\n", i + 1, str + SA[i]);
+             printf("%d. %s\n", i, str + SA[i]);
          }
      }
 
@@ -385,9 +387,9 @@ class ESA {
      // Odredjivanje sufiksnog polja.
      void solve_SA(int *S, int *SA, int n, int *B, int *B_start, int *B_end) {
          bool* s = new bool[n];
-         int* LMS = new int[n/2+1];
-         int* S1 = new int[n/2+1];
-         int* SA1 = new int[n/2+1];
+         int* LMS = new int[n/2+2];
+         int* S1 = new int[n/2+2];
+         int* SA1 = new int[n/2+2];
          int n_LMS = 0;
          bool unique;
 
@@ -520,5 +522,45 @@ class ESA {
              }
          }
          return NULL;
+     }
+     
+     // Trazi i vraca interval svih pojavljivanja niza p unutar niza.
+     std::pair<int,int> search(char *p, int m) {
+        int c = 0, min = 0, i = 0, j = 0, lcp = 0;
+         LcpInterval *interval = getInterval(0, n, p[c]);
+         bool query_found = interval != NULL;
+
+         while (interval != NULL && c < m && query_found) {
+             i = interval->Lb;
+             j = interval->Rb;
+             if (i != j) {
+                 lcp = interval->lcp;
+                 min = std::min(lcp, m);
+                 interval = (min != m) ? getInterval(i, j, p[min]) : NULL;
+                 query_found = true;
+                 for (int k = c; k < min; ++k) {
+                     if (str[SA[i] + k] != p[k]) {
+                         query_found = false;
+                         break;
+                     }
+                 }
+                 c = min;
+             } else {
+                 query_found = true;
+                 for (int k = c; k < m; ++k) {
+                     if (str[SA[i] + k] != p[k]) {
+                         query_found = false;
+                         break;
+                     }
+                 }
+                 c = m;
+                 interval = NULL;
+             }
+         }
+         if (c < m && interval == NULL) query_found = false;
+         if (query_found) {
+            return std::make_pair(i, j);
+         }
+         return std::make_pair(-1, -1);
      }
 };

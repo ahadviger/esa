@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     scanf("%s", P);
     
     std::vector<int> v;
-    printf("First occurence of P in S: %d\n", esa->search(P, strlen(P), v));
+    printf("First occurence of P in S: %d\n", esa->all_occurences(P, strlen(P), v));
     printf("Occurrences of P in S: ");
     for(std::vector<int> :: iterator it = v.begin(); it != v.end(); ++it) {
         printf("%d ", *it);
@@ -42,13 +42,18 @@ int main(int argc, char** argv) {
     
     printf("\n");
     
-    std::vector<int> v2;
+    std::vector<int> v1, v2;
     printf("Longest suffix-prefix overlap: ");
-    printf("%d\n", esa->overlap(P, strlen(P), v2));
+    printf("%d\n", esa->all_overlaps(P, strlen(P), v1, v2));
     printf("Suffix-prefix overlap lengths: ");
+    for(std::vector<int> :: iterator it = v1.begin(); it != v1.end(); ++it) {
+        printf("%d ", *it);
+    }
     for(std::vector<int> :: iterator it = v2.begin(); it != v2.end(); ++it) {
         printf("%d ", *it);
     }
+    
+    printf("\n");
     
     return 0;
 }
