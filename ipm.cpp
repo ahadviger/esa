@@ -6,7 +6,17 @@
 
 #include "esa.cpp"
 
-void solve(char* _str, int n, bool* mask, int m) {
+int cmp(char *str, bool *mask, int m, char *pattern, int n_pattern) {    
+    for(int i = 0; i < n_pattern; ++i) {
+        if(str[i] == '\0') return 1;
+        if(!mask[i % m]) continue;
+        if(str[i] < pattern[i]) return 1;
+        if(str[i] > pattern[i]) return -1;
+    }
+    return 0;
+}
+
+void solve(char* _str, int n, bool* mask, int m, char *pattern, int n_pattern) {
     
     int n_padding = 2 * m - 1;
     if (n % m > 0) n_padding += m - (n % m);
@@ -68,23 +78,46 @@ void solve(char* _str, int n, bool* mask, int m) {
 
     printf("\n");
     int t = (n_padded + 1) / m - 2;
-
+    
+    int* SA_masked = new int[n_padded - m + 1];
+    
     for(int i = 0; i < n_padded - m + 1; ++i) {
-        printf("%d ", (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)));
+        printf("%s\n", str + (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)));
+        SA_masked[i] = (SA[i] % (t + 1)) * m + (SA[i] / (t + 1));
     }
-
+    
+    for(int i = 0; i < n_pattern; ++i) {
+        if(!mask[i % m]) pattern[i] = '*';
+    } 
+    
+    int l = 0, r = n_padded - m + 1;
+    while (l <= r) {
+        int mid = l + (r - l)/2;
+        int res = cmp(str + SA_masked[mid], mask, m, pattern, n_pattern);
+        printf("%s\n", str + SA[mid]);
+        if (res == 0) {
+            printf("%d\n", SA_masked[mid]);
+            break;
+        }
+        if (res < 0) {
+            r = mid - 1;
+        } else {
+            l = mid + 1;
+        }
+    }
 }
 
 
 int main(void) {
 
-    char s[100];
+    char s[100], p[100];
     
     scanf("%s", s);
+    scanf("%s", p);
     
     bool mask[] = {true, false, true};
     
-    solve(s, strlen(s), mask, 3);
+    solve(s, strlen(s), mask, 3, p, strlen(p));
 
     return 0;
 }
