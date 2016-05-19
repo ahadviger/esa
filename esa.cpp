@@ -23,13 +23,9 @@ ESA::ESA(char* _str, int _n, bool esa) {
     str[n] = '\0';
 
     S = new int[n];
-    SA = new int[n];
-    ISA = new int[n];
-    LCP = new int[n];
-    childtab = new ChildTable[n+1];
 
     for (int i = 0; i < n; ++i) {
-        S[i] = str[i];
+        S[i] = (int) str[i];
     }
 
     normalize_string();
@@ -42,7 +38,18 @@ ESA::ESA(char* _str, int _n, bool esa) {
     
     solve_SA(S, SA, n, B, B_start, B_end);
     
-    if (!esa) return;
+    delete(B); delete(B_start); delete(B_end);
+    
+    if (!esa) {
+        delete(S);
+        delete(str);
+        return;
+    }
+    
+    SA = new int[n];
+    ISA = new int[n];
+    LCP = new int[n];
+    childtab = new ChildTable[n+1];
     
     determine_ISA();
     determine_LCP();
@@ -52,6 +59,8 @@ ESA::ESA(char* _str, int _n, bool esa) {
         childtab[i].up = childtab[i].down = childtab[i].nextlIndex = -1;
     }
     construct_child_table();
+    
+    delete(S); delete(str);
 }
 
 int* ESA::get_SA() {
@@ -136,15 +145,16 @@ int ESA::overlap(char *p, int m, std::vector<int>& v) {
 
 int ESA::overlap_reverse(char *p, int m, std::vector<int>& v) {
     ESA* esa = new ESA(p, m, true);
-    return esa->overlap(str, n - 1, v);
+    int ret = esa->overlap(str, n - 1, v);
+    delete(esa);
+    return ret;
 }
 
 int ESA::all_overlaps(char *p, int m, std::vector<int>& v1, std::vector<int>& v2) {
     ESA* esa = new ESA(p, m, true);
-    clock_t start = clock();
     int o1 = overlap(p, m, v1);
     int o2 = esa->overlap(str, n - 1, v2);
-    printf("Vrijeme: %lf\n", (double)(clock() - start) / CLOCKS_PER_SEC);
+    delete(esa);
     if (o1 > o2) {
         return o1;
     }

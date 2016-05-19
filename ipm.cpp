@@ -65,13 +65,13 @@ int* IPM::get_masked_SA(char* _str, int n, bool* mask, int m) {
                 if(!mask[l]) _substr[l] = '*';
             }
             std::string substr(_substr);
-            printf("%s\n", _substr);
+           // printf("%s\n", _substr);
             dislex[d++] = substring_ranks[substr] + 'A';
         }
     }
     delete(_substr);
     printf("yo1\n");
-    printf("%s\n", dislex);
+   // printf("%s\n", dislex);
     ESA* esa = new ESA(dislex, n_padded - m + 1, false);
     printf("yo2\n");
     delete(dislex);
@@ -85,7 +85,7 @@ int* IPM::get_masked_SA(char* _str, int n, bool* mask, int m) {
     for(int i = n_padding - m + 2; i < n_padded - m + 2; ++i) {
         int x = (SA[i] % (t + 1)) * m + (SA[i] / (t + 1));
         SA_masked[i - n_padding + m - 2] = (SA[i] % (t + 1)) * m + (SA[i] / (t + 1));
-        printf("%d %s\n", (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)), str + (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)));
+        //printf("%d %s\n", (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)), str + (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)));
     }
     
     delete(esa);
