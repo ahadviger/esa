@@ -22,7 +22,7 @@ ESA::ESA(char* _str, int _n, bool esa) {
     str[n++] = '|';
     str[n] = '\0';
 
-    S = new int[n];
+    S = new int[n + 1];
 
     for (int i = 0; i < n; ++i) {
         S[i] = (int) str[i];
@@ -35,18 +35,18 @@ ESA::ESA(char* _str, int _n, bool esa) {
     int* B = new int[r];
     int* B_start = new int[r];
     int* B_end = new int[r];
-    
+    SA = new int[n];
+
     solve_SA(S, SA, n, B, B_start, B_end);
     
-    delete(B); delete(B_start); delete(B_end);
+    delete[](B); delete[](B_start); delete[](B_end);
     
     if (!esa) {
-        delete(S);
-        delete(str);
+        delete[](S);
+        delete[](str);
         return;
     }
     
-    SA = new int[n];
     ISA = new int[n];
     LCP = new int[n];
     childtab = new ChildTable[n+1];
@@ -60,7 +60,7 @@ ESA::ESA(char* _str, int _n, bool esa) {
     }
     construct_child_table();
     
-    delete(S); delete(str);
+    delete[](S); delete[](str);
 }
 
 int* ESA::get_SA() {
@@ -231,6 +231,7 @@ void ESA::initialize_buckets(int *S, int n, int *B, int *B_start) {
 }
 
 void ESA::induced_sort(int *SA, int *S, int *B, int *B_start, int *B_end, int n, int *LMS, int n_LMS, bool *char_type) {
+
     int r = std::max(CHAR_NUMBER, n);
 
     for (int i = 0; i < n; ++i) {
@@ -317,7 +318,7 @@ void ESA::name_substrings(int *S1, int *SA, int *S, int *LMS, int n, int n_LMS, 
         S1[i] = named[LMS[i]];
     }
 
-    delete(named);
+    delete[](named);
 }
 
 void ESA::determine_SA(int *SA, int *S, int *SA1, int *LMS, int *B, int *B_start, int *B_end, bool *char_type, int n, int n_LMS) {
@@ -375,7 +376,7 @@ void ESA::solve_SA(int *S, int *SA, int n, int *B, int *B_start, int *B_end) {
     initialize_buckets(S, n, B, B_start);
     determine_SA(SA, S, SA1, LMS, B, B_start, B_end, s, n, n_LMS);
 
-    delete(s); delete(LMS); delete(S1); delete(SA1);
+    delete[](s); delete[](LMS); delete[](S1); delete[](SA1);
 }
 
 void ESA::determine_ISA() {

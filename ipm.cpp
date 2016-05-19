@@ -69,12 +69,12 @@ int* IPM::get_masked_SA(char* _str, int n, bool* mask, int m) {
             dislex[d++] = substring_ranks[substr] + 'A';
         }
     }
-    delete(_substr);
+    delete[](_substr);
     printf("yo1\n");
    // printf("%s\n", dislex);
     ESA* esa = new ESA(dislex, n_padded - m + 1, false);
     printf("yo2\n");
-    delete(dislex);
+    delete[](dislex);
     
     int* SA = esa->get_SA();
 
@@ -88,6 +88,8 @@ int* IPM::get_masked_SA(char* _str, int n, bool* mask, int m) {
         //printf("%d %s\n", (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)), str + (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)));
     }
     
+    delete[](SA);
+    delete[](str);
     delete(esa);
     
     return SA_masked;
