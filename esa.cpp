@@ -11,9 +11,10 @@
 #include "lcpinterval.hpp"
 #include "childtable.hpp"
 
-#define CHAR_NUMBER 100
+#define CHAR_NUMBER 125
 
-ESA::ESA(char* _str, int _n) {
+ESA::ESA(char* _str, int _n, bool esa) {
+
     n = _n;
     str = new char[n+5];
     memcpy(str, _str, n);
@@ -28,8 +29,8 @@ ESA::ESA(char* _str, int _n) {
     childtab = new ChildTable[n+1];
 
     for (int i = 0; i < n; ++i) {
-         S[i] = str[i];
-     }
+        S[i] = str[i];
+    }
 
     normalize_string();
     S[n++] = 0;
@@ -38,8 +39,11 @@ ESA::ESA(char* _str, int _n) {
     int* B = new int[r];
     int* B_start = new int[r];
     int* B_end = new int[r];
-
+    
     solve_SA(S, SA, n, B, B_start, B_end);
+    
+    if (!esa) return;
+    
     determine_ISA();
     determine_LCP();
     SA++; LCP++; n--;
@@ -131,12 +135,12 @@ int ESA::overlap(char *p, int m, std::vector<int>& v) {
 }
 
 int ESA::overlap_reverse(char *p, int m, std::vector<int>& v) {
-    ESA* esa = new ESA(p, m);
+    ESA* esa = new ESA(p, m, true);
     return esa->overlap(str, n - 1, v);
 }
 
 int ESA::all_overlaps(char *p, int m, std::vector<int>& v1, std::vector<int>& v2) {
-    ESA* esa = new ESA(p, m);
+    ESA* esa = new ESA(p, m, true);
     clock_t start = clock();
     int o1 = overlap(p, m, v1);
     int o2 = esa->overlap(str, n - 1, v2);

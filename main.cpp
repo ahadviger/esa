@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     scanf("%s", P);
     
     std::vector<int> v;
-    printf("First occurence of P in S: %d\n", esa->all_occurences(P, strlen(P), v));
+    printf("First occurence of P in S: %d\n", esa->all_occurrences(P, strlen(P), v));
     printf("Occurrences of P in S: ");
     for(std::vector<int> :: iterator it = v.begin(); it != v.end(); ++it) {
         printf("%d ", *it);

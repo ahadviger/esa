@@ -14,7 +14,7 @@ class ESA {
      // izgradjuje poboljsano sufiksno polje.
      // Na kraj niza dodaje se znak '|' veci od svih drugih znakova
      // abecede kako nijedan sufiks ne bi bio prefiks drugog sufiksa.
-     ESA(char* _str, int _n);
+     ESA(char* _str, int _n, bool esa);
     
      // Vraca sufiksno polje.
      int* get_SA();
