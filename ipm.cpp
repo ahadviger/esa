@@ -52,28 +52,27 @@ int* IPM::get_masked_SA(char* _str, int n, bool* mask, int m) {
     char k = 0;
     for(std::set<std::string> :: iterator it = masked_substrings.begin(); it != masked_substrings.end(); ++it) {
         substring_ranks[*it] = k++;
+        if(k < 0) printf("no!\n");
     }
-
+    
     char* dislex = new char[n_padded - m + 1];
     int d = 0;
     
     for(int i = 0; i < m; ++i) {
         for(int j = i; j < n_padded - m + 1; j += m) {
-            //printf("%d\n", j);
             strncpy(_substr, str + j, m);
             for(int l = 0; l < m; ++l) {
                 if(!mask[l]) _substr[l] = '*';
             }
             std::string substr(_substr);
-           // printf("%s\n", _substr);
-            dislex[d++] = substring_ranks[substr] + 'A';
+            dislex[d++] = substring_ranks[substr] + n_padding + 1;
         }
     }
+   
     delete[](_substr);
-    printf("yo1\n");
-   // printf("%s\n", dislex);
+
     ESA* esa = new ESA(dislex, n_padded - m + 1, false);
-    printf("yo2\n");
+
     delete[](dislex);
     
     int* SA = esa->get_SA();
@@ -122,7 +121,7 @@ int IPM::all_occurrences(char* str, int n, bool* mask, int m, char* pattern, int
     
     while (l <= r) {
         int mid = l + (r - l)/2;
-        int res = cmp(str + SA_masked[mid], mask, m, pattern, n_pattern);
+        int res = cmp(str + SA_masked[mid], mask, m, pattern, n_pattern);       
         int res_next = mid < n - 1 ? cmp(str + SA_masked[mid + 1], mask, m, pattern, n_pattern) : 1;
         if (res == 0 && res_next > 0) {
             right = mid;
@@ -135,7 +134,7 @@ int IPM::all_occurrences(char* str, int n, bool* mask, int m, char* pattern, int
             l = mid + 1;
         }
     }
-    
+
     if(!found) return -1;
     
     l = 0, r = n - 1;
