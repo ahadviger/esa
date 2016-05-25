@@ -94,26 +94,7 @@ int* IPM::get_masked_SA(char* _str, int n, bool* mask, int m) {
     return SA_masked;
 }
 
-int IPM::first_occurrence(char* str, int n, bool* mask, int m, char *pattern, int n_pattern, int* SA_masked, std::vector<int>& v) {
-    int l = 0, r = n;
-    while (l <= r) {
-        int mid = l + (r - l)/2;
-        int res = cmp(str + SA_masked[mid], mask, m, pattern, n_pattern);
-        int res_next = mid < n - 1 ? cmp(str + SA_masked[mid + 1], mask, m, pattern, n_pattern) : 1;
-        if (res == 0 && res_next > 0) {
-            return SA_masked[mid];
-            break;
-        }
-        if (res > 0) {
-            r = mid - 1;
-        } else {
-            l = mid + 1;
-        }
-    }
-    return -1;
-}
-
-int IPM::all_occurrences(char* str, int n, bool* mask, int m, char* pattern, int n_pattern, int* SA_masked, std::vector<int>& v) {
+int IPM::all_occurrences(char* str, int n, bool* mask, int m, char* pattern, int n_pattern, int* SA_masked, int *idx) {
 
     int left, right;
     int l = 0, r = n - 1;
@@ -158,9 +139,7 @@ int IPM::all_occurrences(char* str, int n, bool* mask, int m, char* pattern, int
     
     if(!found) return -1;
 
-    for(int i = right; i >= left; --i) {
-        v.push_back(SA_masked[i]);
-    }
-    
+    *idx = left;
+
     return right - left + 1;
 }
