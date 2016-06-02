@@ -4,7 +4,7 @@
 
 #include "lcpinterval.hpp"
 #include "childtable.hpp"
-#include "esa.cpp"
+#include "esa.hpp"
 
 int main(int argc, char** argv) {
     
@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
         n = strlen(S);
     }
     
-    ESA* esa = new ESA(S, n);
+    ESA* esa = new ESA(S, n, true);
     
     // ucitavanje uzorka sa standardnog ulaza
     int m;

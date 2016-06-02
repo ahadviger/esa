@@ -10,8 +10,8 @@
 // zajednickih prefiksa i tablicu djece.
 class ESA {
  public:
-     // Konstruktor. Prima znakovni niz i njegovu duljinu te za taj niz
-     // izgradjuje poboljsano sufiksno polje.
+     // Konstruktor. Prima znakovni niz i njegovu duljinu.
+     // Ako je esa=true, gradi se poboljsano sufiksno polje, inace samo SA.
      // Na kraj niza dodaje se znak '|' veci od svih drugih znakova
      // abecede kako nijedan sufiks ne bi bio prefiks drugog sufiksa.
      ESA(char* _str, int _n, bool esa);
@@ -59,7 +59,7 @@ class ESA {
      // Vraca duljinu maksimalnog suf-pref/pref-suf preklapanja.
      int all_overlaps(char *p, int m, std::vector<int>& v1, std::vector<int>& v2);
 
-     // Vraca indeks prvog pojavljivanja niza p unutar
+     // Vraca indeks nekog pojavljivanja niza p unutar
      // niza nad kojim je izgradjeno polje, no za pretragu
      // koristi samo sufiksno polje.
      int search_SA(char *p, int m);
