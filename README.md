@@ -2,7 +2,13 @@
 
 Implementacija poboljšanog sufiksnog polja. Izgradnja sufiksnog polja algoritmom SA-IS.
 
-#### esa.hpp
+1. izgradnja primjera za testiranje ESA: `make esa`
+(program kao argument prima putanju datoteke s referentnim genomom, sa standardnog ulaza prima duljinu traženog očitanja i samo očitanje)
+
+2. izgradnja primjera za testiranje inexact pattern matchinga: `make ipm`
+(program kao argument prima putanju datoteke s referentnim genomom)
+
+##### Enhanced Suffix Array: esa.hpp
 ```c++
      // Konstruktor. Prima znakovni niz i njegovu duljinu
      // Ako je esa=true, gradi se poboljsano sufiksno polje, inace samo SA.
@@ -62,15 +68,15 @@ Implementacija poboljšanog sufiksnog polja. Izgradnja sufiksnog polja algoritmo
      void print_sorted();
 ```
 
-#### ipm.hpp
+##### Inexact Pattern Matching: ipm.hpp
 ```c++
-     // Vraca maskirano sufiksno polje.
-     // Prima niz, duljinu niza, masku i duljinu maske.
+     // Vraca maskirano sufiksno polje ulaznog niza _str.
+     // Prima niz, duljinu niza n, masku i duljinu maske m.
      static int* get_masked_SA(char* _str, int n, bool* mask, int m);
 
-     // Trazi sva pojavljivanja znakovnog niza pattern pod maskom mask
-     // unutar niza nad kojim je izgradjeno polje.
+     // Trazi sva pojavljivanja znakovnog niza pattern pod maskom mask duljine m
+     // unutar niza str duljine n. Prima i maskirano sufiksno polje SA_masked.
      // Vraca broj pojavljivanja unutar niza i u varijablu idx upisuje
-     // indeks prvog pojavljivanja.
+     // indeks prvog pojavljivanja unutar sufiksnog polja.
      static int all_occurrences(char* str, int n, bool* mask, int m, char *pattern, int n_pattern, int* SA_masked, int* idx);
 ```     
