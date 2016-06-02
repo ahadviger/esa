@@ -2,10 +2,10 @@
 
 Implementacija poboljšanog sufiksnog polja. Izgradnja sufiksnog polja algoritmom SA-IS.
 
-1. izgradnja primjera za testiranje ESA: `make esa`
+1. izgradnja primjera za testiranje ESA (esa_main): `make esa`
 (program kao argument prima putanju datoteke s referentnim genomom, sa standardnog ulaza prima duljinu traženog očitanja i samo očitanje)
 
-2. izgradnja primjera za testiranje inexact pattern matchinga: `make ipm`
+2. izgradnja primjera za testiranje inexact pattern matchinga (ipm_main): `make ipm`
 (program kao argument prima putanju datoteke s referentnim genomom)
 
 ##### Enhanced Suffix Array: esa.hpp
