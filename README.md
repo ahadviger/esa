@@ -2,7 +2,13 @@
 
 Implementacija poboljšanog sufiksnog polja. Izgradnja sufiksnog polja algoritmom SA-IS.
 
-#### esa.hpp
+1. izgradnja primjera za testiranje ESA: `make esa`
+(program kao argument prima putanju datoteke s referentnim genomom, sa standardnog ulaza prima duljinu traženog očitanja i samo očitanje)
+
+2. izgradnja primjera za testiranje inexact pattern matchinga: `make ipm`
+(program kao argument prima putanju datoteke s referentnim genomom)
+
+##### Enhanced Suffix Array: esa.hpp
 ```c++
      // Konstruktor. Prima znakovni niz i njegovu duljinu
      // Ako je esa=true, gradi se poboljsano sufiksno polje, inace samo SA.
@@ -62,7 +68,7 @@ Implementacija poboljšanog sufiksnog polja. Izgradnja sufiksnog polja algoritmo
      void print_sorted();
 ```
 
-#### ipm.hpp
+##### Inexact Pattern Matching: ipm.hpp
 ```c++
      // Vraca maskirano sufiksno polje.
      // Prima niz, duljinu niza, masku i duljinu maske.
