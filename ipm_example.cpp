@@ -24,17 +24,17 @@ int main(int argc, char** argv) {
     int *SA_masked = IPM::get_masked_SA(s, n, mask, d);
     printf("Vrijeme izgradnje SSA: %lf\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
    
-    char* p = new char[n+5];
-
     ///////////////////////////////////////
 
-    int m = 100;
-    memcpy(p, s + n / 4, m);
-    p[m] = '\0';
+    int m;
+    scanf("%d", &m);
+    char* p = new char[m+5];
+    scanf("%s", p);
 
     int idx;
     start = clock();
-    IPM::all_occurrences(s, n, mask, d, p, m, SA_masked, &idx);
+    int x = IPM::all_occurrences(s, n, mask, d, p, m, SA_masked, &idx);
+    printf("Prvo pojavljivanje: %d\nBroj pojavljivanja: %d\n", idx, x);
     printf("Vrijeme pretrage SSA: %lf\n", (double)(clock() - start) / CLOCKS_PER_SEC * 1000);
 
     delete[](s);

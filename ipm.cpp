@@ -52,7 +52,7 @@ int* IPM::get_masked_SA(char* _str, int n, bool* mask, int m) {
     char k = 0;
     for(std::set<std::string> :: iterator it = masked_substrings.begin(); it != masked_substrings.end(); ++it) {
         substring_ranks[*it] = k++;
-        if(k < 0) printf("no!\n");
+        if(k < 0) printf("Char overflow!\n");
     }
     
     char* dislex = new char[n_padded - m + 1];
@@ -84,7 +84,6 @@ int* IPM::get_masked_SA(char* _str, int n, bool* mask, int m) {
     for(int i = n_padding - m + 2; i < n_padded - m + 2; ++i) {
         int x = (SA[i] % (t + 1)) * m + (SA[i] / (t + 1));
         SA_masked[i - n_padding + m - 2] = (SA[i] % (t + 1)) * m + (SA[i] / (t + 1));
-        //printf("%d %s\n", (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)), str + (SA[i] % (t + 1)) * m + (SA[i] / (t + 1)));
     }
     
     delete[](SA);
